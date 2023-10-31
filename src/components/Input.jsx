@@ -19,30 +19,48 @@ const Input = () => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
   console.log("text", img);
-  const handleSelect = async () => {
+  const handleSend = async (e) => {
+    // e.preventDefault();
     console.log("in handle selecct");
     if (img) {
       console.log("in if");
       const storageRef = ref(storage, uuid());
       const uploadTask = uploadBytesResumable(storageRef, img);
       uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+
         (error) => {
           console.log("upload error", error);
         },
-        async () => {
-          await getDownloadURL(uploadTask.snapshot.ref).then(
-            async (downloadURL) => {
-              await updateDoc(doc(db, "chats", data.chatId), {
-                messages: arrayUnion({
-                  id: uuid(),
-                  text,
-                  senderId: currentUser.uid,
-                  date: Timestamp.now(),
-                  img: downloadURL,
-                }),
-              });
-            }
-          );
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+            console.log("in task upload", downloadURL);
+
+            await updateDoc(doc(db, "chats", data.chatId), {
+              messages: arrayUnion({
+                id: uuid(),
+                text,
+                senderId: currentUser.uid,
+                date: Timestamp.now(),
+                img: downloadURL,
+              }),
+            });
+          });
         }
       );
       await updateDoc(doc(db, "userChats", currentUser.uid), {
@@ -103,7 +121,7 @@ const Input = () => {
         <label htmlFor="file">
           <img src={img !== null ? URL.createObjectURL(img) : imglogo} alt="" />
         </label>
-        <button onClick={handleSelect}>Send</button>
+        <button onClick={handleSend}>Send</button>
       </div>
     </div>
   );

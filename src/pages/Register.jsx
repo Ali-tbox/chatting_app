@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 import { auth, storage, db } from "../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  getMetadata,
-} from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import imglogo from "../assests/img.png";
 import { Link, useNavigate } from "react-router-dom";
@@ -30,6 +25,22 @@ function Register() {
       const uploadTask = uploadBytesResumable(storageRef, image);
 
       uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
         (error) => {
           console.log("upload error", error);
           setError(true);
