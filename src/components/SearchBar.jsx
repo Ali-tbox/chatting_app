@@ -22,6 +22,7 @@ const SearchBar = () => {
   const userRef = collection(db, "users");
   const handleSearch = async () => {
     const q = query(userRef, where("displayName", "==", userName));
+
     try {
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {

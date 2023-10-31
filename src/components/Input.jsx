@@ -16,9 +16,11 @@ import { db, storage } from "../firebase";
 const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const [emoji, setEmoji] = useState("");
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
-  console.log("text", img);
+  const emojis = ["😀", "😃", "😄", "🤣"];
+  console.log("in handle emoi", emoji);
   const handleSend = async (e) => {
     // e.preventDefault();
     console.log("in handle selecct");
@@ -29,8 +31,6 @@ const Input = () => {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          // Observe state change events such as progress, pause, and resume
-          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log("Upload is " + progress + "% done");
@@ -82,6 +82,7 @@ const Input = () => {
           id: uuid(),
           text,
           senderId: currentUser.uid,
+          emoji: emoji,
           date: Timestamp.now(),
         }),
       });
@@ -101,17 +102,30 @@ const Input = () => {
 
     setText("");
     setImg(null);
+    setEmoji("");
+  };
+  const handleKey = (e) => {
+    e.code === "Enter" && handleSend();
   };
   return (
     <div className="input">
       <input
         type="text"
         placeholder="Type something..."
+        onKeyDown={handleKey}
         onChange={(e) => setText(e.target.value)}
         value={text}
       />
+      <label for="cars">{emoji}</label>
+
+      <select id="cars" onChange={(e) => setEmoji(e.target.value)}>
+        {emojis.map((em, index) => (
+          <option key={index} value={em}>
+            {em}
+          </option>
+        ))}
+      </select>
       <div className="send">
-        {/* <img src={imglogo} alt="" /> */}
         <input
           type="file"
           style={{ display: "none" }}

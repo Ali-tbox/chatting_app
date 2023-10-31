@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
 
-const Message = ({ message }) => {
+const Message = ({ message, handleClick }) => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
   const ref = useRef();
@@ -27,7 +27,18 @@ const Message = ({ message }) => {
         <span>just now</span>
       </div>
       <div className="messageContent">
-        <p>{message?.text}</p>
+        <div style={{ display: "flex" }}>
+          <p>
+            {message?.text}
+            {message?.emoji}
+          </p>
+          {/* <button
+            onClick={() => handleClick(message)}
+            style={{ width: "30px", height: "15px", fontSize: "10px" }}
+          >
+            Edit
+          </button> */}
+        </div>
         {message?.img && <img src={message?.img} alt="" />}
       </div>
     </div>
